@@ -1,0 +1,11 @@
+*/flutter-app/.fvm/
+*.log
+.DS_Store
+build/
+.idea/
+*.iml
+android/.gradle/
+android/local.properties
+.dart_tool/
+.packages
+.pub/
