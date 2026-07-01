@@ -42,5 +42,5 @@ flutter {
 }
 
 dependencies {
-  // kotlin stdlib provided by kotlin-android plugin
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
