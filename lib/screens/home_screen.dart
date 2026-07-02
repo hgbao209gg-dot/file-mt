@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/file_item.dart';
 import '../services/file_service.dart';
 import '../widgets/file_panel.dart';
-import '../widgets/file_icon.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,9 +11,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _leftKey = GlobalKey<FilePanelState>();
   final _rightKey = GlobalKey<FilePanelState>();
-  FileItem? _selectedLeft;
-  FileItem? _selectedRight;
-  List<String> _history = [];
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: FilePanel(
               key: _leftKey,
-              onFileTap: (f) => _selectedLeft = f,
+              onFileTap: (f) {},
             ),
           ),
           divider,
           Expanded(
             child: FilePanel(
               key: _rightKey,
-              onFileTap: (f) => _selectedRight = f,
+              onFileTap: (f) {},
             ),
           ),
         ],
@@ -154,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _snack(String msg) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
   }
 }
