@@ -9,3 +9,4 @@ android/local.properties
 .dart_tool/
 .packages
 .pub/
+.backup/
