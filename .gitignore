@@ -6,8 +6,6 @@ build/
 *.iml
 android/.gradle/
 android/local.properties
-android/
-ios/
 .dart_tool/
 .packages
 .pub/
