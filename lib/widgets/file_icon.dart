@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/file_item.dart';
 
 Icon fileIcon(FileItem item) {
-  if (item.isDir) return const Icon(Icons.folder, color: Colors.amber);
+  if (item.isDir) {
+    return const Icon(Icons.folder, color: Colors.amber);
+  }
   const map = {
     'dart': Icons.code, 'kt': Icons.code, 'java': Icons.code, 'py': Icons.code,
     'js': Icons.javascript, 'ts': Icons.code, 'xml': Icons.code, 'html': Icons.html,

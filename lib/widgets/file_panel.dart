@@ -56,14 +56,18 @@ class FilePanelState extends State<FilePanel> {
       _items = [];
       _error = e.toString();
     }
-    if (mounted) setState(() => _loading = false);
+    if (mounted) {
+      setState(() => _loading = false);
+    }
   }
 
   Future<void> refresh() => _load();
 
   void goUp() {
     final parts = _currentPath.split('/')..removeLast();
-    if (parts.isEmpty) return;
+    if (parts.isEmpty) {
+      return;
+    }
     navigateTo(parts.join('/'));
   }
 

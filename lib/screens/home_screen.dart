@@ -122,7 +122,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _newFolder() async {
     final path = _leftKey.currentState?.currentPath;
-    if (path == null) return;
+    if (path == null) {
+      return;
+    }
     final nameController = TextEditingController();
     final name = await showDialog<String>(
       context: context,

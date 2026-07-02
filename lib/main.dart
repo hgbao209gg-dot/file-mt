@@ -52,25 +52,33 @@ class _PermissionGateState extends State<PermissionGate> {
   Future<void> _request() async {
     final status = await Permission.storage.status;
     if (status.isGranted) {
-      if (mounted) { setState(() => _granted = true); }
+      if (mounted) {
+        setState(() => _granted = true);
+      }
       return;
     }
 
     if (await Permission.manageExternalStorage.isGranted) {
-      if (mounted) { setState(() => _granted = true); }
+      if (mounted) {
+        setState(() => _granted = true);
+      }
       return;
     }
 
     // Try storage first (API < 30), then manageExternalStorage (API 30+)
     var result = await Permission.storage.request();
     if (result.isGranted) {
-      if (mounted) { setState(() => _granted = true); }
+      if (mounted) {
+        setState(() => _granted = true);
+      }
       return;
     }
 
     result = await Permission.manageExternalStorage.request();
     if (result.isGranted) {
-      if (mounted) { setState(() => _granted = true); }
+      if (mounted) {
+        setState(() => _granted = true);
+      }
       return;
     }
 
@@ -80,13 +88,17 @@ class _PermissionGateState extends State<PermissionGate> {
             'Please enable "All files access" in Settings > Apps > AppTest.');
       }
     } else {
-      if (mounted) { setState(() => _error = 'Storage permission is required.'); }
+      if (mounted) {
+        setState(() => _error = 'Storage permission is required.');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_granted) { return widget.child; }
+    if (_granted) {
+      return widget.child;
+    }
     return Scaffold(
       body: Center(
         child: Padding(
@@ -116,9 +128,9 @@ class _PermissionGateState extends State<PermissionGate> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 8),
-                const FilledButton.tonal(
+                FilledButton.tonal(
                   onPressed: openAppSettings,
-                  child: Text('Open Settings'),
+                  child: const Text('Open Settings'),
                 ),
               ],
             ],
