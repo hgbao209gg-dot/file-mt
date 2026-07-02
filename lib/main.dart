@@ -116,9 +116,9 @@ class _PermissionGateState extends State<PermissionGate> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 8),
-                FilledButton.tonal(
+                const FilledButton.tonal(
                   onPressed: openAppSettings,
-                  child: const Text('Open Settings'),
+                  child: Text('Open Settings'),
                 ),
               ],
             ],
