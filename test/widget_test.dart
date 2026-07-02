@@ -2,8 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:apptest/main.dart';
 
 void main() {
-  testWidgets('App renders home screen', (tester) async {
+  testWidgets('App shows permission request on launch', (tester) async {
     await tester.pumpWidget(const AppTestApp());
-    expect(find.text('File Manager'), findsOneWidget);
+    // Should show permission gate before files
+    expect(find.text('File Manager needs storage access'), findsOneWidget);
+    expect(find.text('Grant Access'), findsOneWidget);
   });
 }

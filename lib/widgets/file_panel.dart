@@ -44,13 +44,17 @@ class FilePanelState extends State<FilePanel> {
     widget.onNavigate?.call(path);
   }
 
+  String? _error;
+
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
+      _error = null;
       final list = await FileService.listDir(_currentPath);
       _items = list.map((m) => FileItem.fromMap(m)).toList();
-    } catch (_) {
+    } catch (e) {
       _items = [];
+      _error = e.toString();
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -99,7 +103,15 @@ class FilePanelState extends State<FilePanel> {
           child: _loading
               ? const Center(child: CircularProgressIndicator())
               : _items.isEmpty
-                  ? Center(child: Text('Empty', style: theme.textTheme.bodyMedium))
+                  ? Center(
+                      child: Text(
+                        _error ?? 'Empty',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: _error != null ? theme.colorScheme.error : null,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: _items.length,
                       itemBuilder: (context, i) {
