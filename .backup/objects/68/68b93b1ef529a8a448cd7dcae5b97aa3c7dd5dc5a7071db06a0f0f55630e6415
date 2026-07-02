@@ -63,9 +63,8 @@ class _ServerPageState extends State<ServerPage> {
   void _pollLog() async {
     while (mounted) {
       final log = await _channel.invokeMethod<String>('getLog');
-      if (log != null && log.isNotEmpty) {
-        setState(() => _log = log);
-      }
+      if (log == null || log.isEmpty) break;
+      setState(() => _log = log);
       await Future.delayed(const Duration(seconds: 1));
     }
   }
