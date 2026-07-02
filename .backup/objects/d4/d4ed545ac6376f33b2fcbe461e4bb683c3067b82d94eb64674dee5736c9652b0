@@ -1,0 +1,143 @@
+package com.example.apptest
+
+import android.content.res.AssetManager
+import android.util.Log
+import androidx.annotation.NonNull
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStreamReader
+
+class MainActivity : FlutterActivity() {
+    private val CHANNEL = "apptest/server"
+    private var serverProcess: Process? = null
+    private var jreDir: File? = null
+
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "extractJre" -> {
+                    try {
+                        val dest = extractJre()
+                        result.success(dest)
+                    } catch (e: Exception) {
+                        result.error("EXTRACT_FAILED", e.message, null)
+                    }
+                }
+                "startServer" -> {
+                    val args = call.argument<List<String>>("args") ?: emptyList()
+                    try {
+                        startServer(args)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("START_FAILED", e.message, null)
+                    }
+                }
+                "stopServer" -> {
+                    stopServer()
+                    result.success(true)
+                }
+                "getLog" -> {
+                    result.success(getLog())
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    private fun getAssetDir(): File {
+        val dir = File(filesDir, "minecraft")
+        dir.mkdirs()
+        return dir
+    }
+
+    private fun extractJre(): String {
+        val jreDest = File(filesDir, "jre")
+        if (jreDest.exists()) {
+            return jreDest.absolutePath
+        }
+        // Copy jre binary from assets/jre-arm64/
+        val assets: AssetManager = assets
+        val jreAssets = assets.list("jre-arm64") ?: throw IOException("No jre-arm64 in assets")
+        copyAssetDir("jre-arm64", jreDest)
+        // Make java executable
+        val javaBin = File(jreDest, "bin/java")
+        javaBin.setExecutable(true)
+        jreDir = jreDest
+        return jreDest.absolutePath
+    }
+
+    private fun copyAssetDir(assetPath: String, dest: File) {
+        val assets: AssetManager = assets
+        val list = assets.list(assetPath) ?: return
+        if (list.isEmpty()) {
+            // File
+            dest.parentFile?.mkdirs()
+            assets.open(assetPath).use { `in` ->
+                FileOutputStream(dest).use { out ->
+                    `in`.copyTo(out)
+                }
+            }
+        } else {
+            dest.mkdirs()
+            for (name in list) {
+                copyAssetDir("$assetPath/$name", File(dest, name))
+            }
+        }
+    }
+
+    private fun startServer(args: List<String>) {
+        val jre = jreDir ?: throw IllegalStateException("JRE not extracted. Call extractJre first.")
+        val serverJar = File(getAssetDir(), "server.jar")
+        if (!serverJar.exists()) {
+            throw IOException("server.jar not found in assets/minecraft/")
+        }
+        val cmd = mutableListOf(
+            File(jre, "bin/java").absolutePath,
+            "-Xms1G",
+            "-Xmx2G",
+            "-jar",
+            serverJar.absolutePath,
+            "nogui"
+        )
+        cmd.addAll(args)
+
+        val pb = ProcessBuilder(cmd)
+            .directory(getAssetDir())
+            .redirectErrorStream(true)
+
+        serverProcess = pb.start()
+    }
+
+    private fun stopServer() {
+        serverProcess?.let {
+            it.destroyForcibly()
+            serverProcess = null
+        }
+    }
+
+    private fun getLog(): String {
+        val proc = serverProcess ?: return ""
+        try {
+            val reader = BufferedReader(InputStreamReader(proc.inputStream))
+            val lines = mutableListOf<String>()
+            var line: String?
+            while (reader.ready().also { line = reader.readLine() } == true) {
+                line?.let { lines.add(it) }
+            }
+            return lines.takeLast(50).joinToString("\n")
+        } catch (e: Exception) {
+            return "Error reading log: ${e.message}"
+        }
+    }
+
+    override fun onDestroy() {
+        stopServer()
+        super.onDestroy()
+    }
+}

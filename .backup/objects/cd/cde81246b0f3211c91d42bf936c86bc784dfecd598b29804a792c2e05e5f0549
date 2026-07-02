@@ -25,23 +25,23 @@ class ServerPage extends StatefulWidget {
 
 class _ServerPageState extends State<ServerPage> {
   static const _channel = MethodChannel('apptest/server');
-  String _status = 'Tap Install JRE to begin';
+  String _status = 'Idle';
   String _log = '';
   bool _jreReady = false;
 
-  Future<void> _installJre() async {
-    setState(() => _status = 'Downloading & installing JRE (~50MB)…');
+  Future<void> _extractJre() async {
+    setState(() => _status = 'Extracting JRE...');
     try {
-      final msg = await _channel.invokeMethod<String>('installJre');
+      await _channel.invokeMethod('extractJre');
       setState(() => _jreReady = true);
-      _status = 'JRE ready — put server.jar in minecraft/ then Start';
+      _status = 'JRE ready. Place server.jar in assets/minecraft/';
     } on PlatformException catch (e) {
       setState(() => _status = 'Error: ${e.message}');
     }
   }
 
   Future<void> _start() async {
-    setState(() => _status = 'Starting server…');
+    setState(() => _status = 'Starting server...');
     try {
       await _channel.invokeMethod('startServer', {'args': <String>['nogui']});
       _status = 'Running';
@@ -73,15 +73,15 @@ class _ServerPageState extends State<ServerPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(_status, style: Theme.of(context).textTheme.titleMedium),
+            Text('Status: $_status', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FilledButton.icon(
-                  onPressed: _jreReady ? null : _installJre,
-                  icon: const Icon(Icons.download),
-                  label: const Text('Install JRE'),
+                  onPressed: _jreReady ? null : _extractJre,
+                  icon: const Icon(Icons.unarchive),
+                  label: const Text('Extract JRE'),
                 ),
                 const SizedBox(width: 12),
                 FilledButton.icon(
@@ -108,7 +108,7 @@ class _ServerPageState extends State<ServerPage> {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    _log.isEmpty ? 'Server output will appear here…' : _log,
+                    _log.isEmpty ? 'Waiting for output...' : _log,
                     style: const TextStyle(fontFamily: 'monospace', color: Colors.greenAccent, fontSize: 12),
                   ),
                 ),
